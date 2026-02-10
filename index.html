@@ -78,20 +78,41 @@
 <script>
   let nombre = "";
 
+  // CARGAR PÁGINA DESDE LINK
+  window.onload = () => {
+    const hash = location.hash.replace("#", "");
+    if (hash) {
+      const data = localStorage.getItem("page_" + hash);
+      if (data) {
+        nombre = hash;
+        mostrarPagina(data, true);
+      }
+    }
+  };
+
   function entrar() {
-    nombre = document.getElementById("nombrePagina").value.trim();
+    nombre = nombrePagina.value.trim();
     if (!nombre) return alert("Poné un nombre");
 
     document.title = nombre;
-    document.getElementById("tituloPagina").innerText = "Editando: " + nombre;
+    tituloPagina.innerText = "Editando: " + nombre;
 
     pantalla1.classList.remove("activa");
     pantalla2.classList.add("activa");
   }
 
   function verPagina(publicado) {
-    const html = document.getElementById("htmlInput").value;
+    const html = htmlInput.value;
 
+    if (publicado) {
+      localStorage.setItem("page_" + nombre, html);
+      location.hash = nombre;
+    }
+
+    mostrarPagina(html, publicado);
+  }
+
+  function mostrarPagina(html, publicado) {
     document.open();
     document.write(`
       <!DOCTYPE html>
@@ -101,7 +122,6 @@
         <title>${nombre}</title>
         <style>
           body { margin: 0; font-family: system-ui; }
-
           #barra {
             position: fixed;
             top: 10px;
@@ -110,7 +130,6 @@
             gap: 10px;
             z-index: 9999;
           }
-
           .btn {
             background: black;
             color: white;
@@ -118,14 +137,13 @@
             border-radius: 10px;
             font-weight: bold;
             cursor: pointer;
-            opacity: 0.85;
           }
         </style>
       </head>
       <body>
 
         <div id="barra">
-          ${publicado ? "" : `<div class="btn" onclick="location.reload()">⬅ Editor</div>`}
+          ${publicado ? "" : `<div class="btn" onclick="location.href=location.pathname">⬅ Editor</div>`}
           <div class="btn" onclick="compartir()">📤 Compartir</div>
         </div>
 
@@ -133,17 +151,22 @@
 
         <script>
           function compartir() {
+            const url = location.href;
             if (navigator.share) {
-              navigator.share({
-                title: document.title,
-                url: location.href
-              });
+              navigator.share({ title: document.title, url });
             } else {
-              navigator.clipboard.writeText(location.href);
+              navigator.clipboard.writeText(url);
               alert("Link copiado");
             }
           }
         <\/script>
+
+      </body>
+      </html>
+    `);
+    document.close();
+  }
+</script>
 
       </body>
       </html>
