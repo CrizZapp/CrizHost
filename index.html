@@ -48,6 +48,10 @@
       font-weight: bold;
       cursor: pointer;
     }
+
+    .btn-publicar {
+      background: #22c55e;
+    }
   </style>
 </head>
 <body>
@@ -56,7 +60,7 @@
 
   <!-- PANTALLA 1 -->
   <div id="pantalla1" class="pantalla activa">
-    <h2>📱 Crear tu página</h2>
+    <h2>📱 Crea tu página</h2>
     <input id="nombrePagina" placeholder="Nombre de tu página">
     <button onclick="entrar()">Entrar</button>
   </div>
@@ -65,7 +69,8 @@
   <div id="pantalla2" class="pantalla">
     <h2 id="tituloPagina"></h2>
     <textarea id="htmlInput" placeholder="Pegá tu HTML acá..."></textarea>
-    <button onclick="verPantallaCompleta()">Ver</button>
+    <button onclick="verPagina(false)">👁 Ver</button>
+    <button class="btn-publicar" onclick="verPagina(true)">🚀 Publicar</button>
   </div>
 
 </div>
@@ -75,10 +80,7 @@
 
   function entrar() {
     nombre = document.getElementById("nombrePagina").value.trim();
-    if (!nombre) {
-      alert("Poné un nombre");
-      return;
-    }
+    if (!nombre) return alert("Poné un nombre");
 
     document.title = nombre;
     document.getElementById("tituloPagina").innerText = "Editando: " + nombre;
@@ -87,41 +89,66 @@
     pantalla2.classList.add("activa");
   }
 
-  function verPantallaCompleta() {
-    const htmlUsuario = document.getElementById("htmlInput").value;
+  function verPagina(publicado) {
+    const html = document.getElementById("htmlInput").value;
 
-    const ventana = window.open("", "_self");
-
-    ventana.document.open();
-    ventana.document.write(`
+    document.open();
+    document.write(`
       <!DOCTYPE html>
       <html>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${nombre}</title>
         <style>
-          #volver {
+          body { margin: 0; font-family: system-ui; }
+
+          #barra {
             position: fixed;
             top: 10px;
             left: 10px;
+            display: flex;
+            gap: 10px;
             z-index: 9999;
+          }
+
+          .btn {
             background: black;
             color: white;
             padding: 10px 14px;
             border-radius: 10px;
             font-weight: bold;
             cursor: pointer;
-            opacity: 0.8;
+            opacity: 0.85;
           }
         </style>
       </head>
       <body>
-        <div id="volver" onclick="location.reload()">⬅ Volver</div>
-        ${htmlUsuario}
+
+        <div id="barra">
+          ${publicado ? "" : `<div class="btn" onclick="location.reload()">⬅ Editor</div>`}
+          <div class="btn" onclick="compartir()">📤 Compartir</div>
+        </div>
+
+        ${html}
+
+        <script>
+          function compartir() {
+            if (navigator.share) {
+              navigator.share({
+                title: document.title,
+                url: location.href
+              });
+            } else {
+              navigator.clipboard.writeText(location.href);
+              alert("Link copiado");
+            }
+          }
+        <\/script>
+
       </body>
       </html>
     `);
-    ventana.document.close();
+    document.close();
   }
 </script>
 
