@@ -7,7 +7,6 @@
 
   <style>
     * { box-sizing: border-box; }
-
     body {
       font-family: system-ui, sans-serif;
       background: #0f172a;
@@ -15,15 +14,12 @@
       margin: 0;
       padding: 16px;
     }
-
     .contenedor {
       max-width: 600px;
       margin: auto;
     }
-
     .pantalla { display: none; }
     .pantalla.activa { display: block; }
-
     input, textarea, button {
       width: 100%;
       margin-top: 12px;
@@ -32,18 +28,15 @@
       border-radius: 10px;
       border: none;
     }
-
     textarea {
       height: 220px;
       resize: vertical;
     }
-
     button {
       background: #38bdf8;
       font-weight: bold;
       cursor: pointer;
     }
-
     .btn-publicar {
       background: #22c55e;
     }
@@ -53,12 +46,14 @@
 
 <div class="contenedor">
 
+  <!-- PANTALLA 1 -->
   <div id="pantalla1" class="pantalla activa">
     <h2>📱 Crea tu página</h2>
     <input id="nombrePagina" placeholder="Nombre de tu página">
     <button onclick="entrar()">Entrar</button>
   </div>
 
+  <!-- PANTALLA 2 -->
   <div id="pantalla2" class="pantalla">
     <h2 id="tituloPagina"></h2>
     <textarea id="htmlInput" placeholder="Pegá tu HTML acá..."></textarea>
@@ -71,14 +66,19 @@
 <script>
   let nombre = "";
 
+  // Cargar borrador si existe
   window.onload = () => {
-    const hash = location.hash.replace("#", "");
-    if (hash) {
-      const data = localStorage.getItem("page_" + hash);
-      if (data) {
-        nombre = hash;
-        mostrarPagina(data, true);
-      }
+    const draftNombre = localStorage.getItem("draft_nombre");
+    const draftHtml = localStorage.getItem("draft_html");
+
+    if (draftNombre && draftHtml) {
+      nombre = draftNombre;
+      nombrePagina.value = draftNombre;
+      htmlInput.value = draftHtml;
+      tituloPagina.innerText = "Editando: " + nombre;
+
+      pantalla1.classList.remove("activa");
+      pantalla2.classList.add("activa");
     }
   };
 
@@ -86,28 +86,27 @@
     nombre = nombrePagina.value.trim();
     if (!nombre) return alert("Poné un nombre");
 
-    document.title = nombre;
-    tituloPagina.innerText = "Editando: " + nombre;
+    localStorage.setItem("draft_nombre", nombre);
 
+    tituloPagina.innerText = "Editando: " + nombre;
     pantalla1.classList.remove("activa");
     pantalla2.classList.add("activa");
   }
 
   function verPagina(publicado) {
-    const html = htmlInput.value;
+    localStorage.setItem("draft_html", htmlInput.value);
 
     if (publicado) {
-      localStorage.setItem("page_" + nombre, html);
+      localStorage.setItem("page_" + nombre, htmlInput.value);
       location.hash = nombre;
     }
 
-    mostrarPagina(html, publicado);
+    abrirVista(htmlInput.value, publicado);
   }
 
-  function mostrarPagina(html, publicado) {
+  function abrirVista(html, publicado) {
     document.open();
-    document.write(`
-<!DOCTYPE html>
+    document.write(`<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -135,7 +134,7 @@ body { margin:0; font-family:system-ui; }
 <body>
 
 <div id="barra">
-  ${publicado ? "" : `<div class="btn" onclick="location.href=location.pathname">⬅ Editor</div>`}
+  ${publicado ? "" : `<div class="btn" onclick="location.reload()">⬅ Editor</div>`}
   <div class="btn" onclick="compartir()">📤 Compartir</div>
 </div>
 
@@ -154,8 +153,7 @@ function compartir() {
 <\/script>
 
 </body>
-</html>
-    `);
+</html>`);
     document.close();
   }
 </script>
