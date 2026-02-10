@@ -68,19 +68,19 @@
 
   // Cargar borrador si existe
   window.onload = () => {
-    const draftNombre = localStorage.getItem("draft_nombre");
-    const draftHtml = localStorage.getItem("draft_html");
+  const draftNombre = localStorage.getItem("draft_nombre");
+  const draftHtml = localStorage.getItem("draft_html");
 
-    if (draftNombre && draftHtml) {
-      nombre = draftNombre;
-      nombrePagina.value = draftNombre;
-      htmlInput.value = draftHtml;
-      tituloPagina.innerText = "Editando: " + nombre;
+  if (draftNombre && draftHtml) {
+    nombre = draftNombre;
+    nombrePagina.value = draftNombre;
+    htmlInput.value = draftHtml;
+    tituloPagina.innerText = "Editando: " + nombre;
 
-      pantalla1.classList.remove("activa");
-      pantalla2.classList.add("activa");
-    }
-  };
+    pantalla1.classList.remove("activa");
+    pantalla2.classList.add("activa");
+  }
+};
 
   function entrar() {
     nombre = nombrePagina.value.trim();
