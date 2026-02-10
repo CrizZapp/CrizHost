@@ -56,9 +56,10 @@
   <!-- PANTALLA 2 -->
   <div id="pantalla2" class="pantalla">
     <h2 id="tituloPagina"></h2>
-    <textarea id="htmlInput" placeholder="Pegá tu HTML acá..."></textarea>
+    <textarea id="htmlInput" placeholder="Pegá el HTML de tu pagina aca..."></textarea>
     <button onclick="verPagina(false)">👁 Ver</button>
-    <button class="btn-publicar" onclick="verPagina(true)">🚀 Publicar</button>
+<button class="btn-publicar" onclick="verPagina(true)">🚀 Publicar</button>
+<button onclick="nuevaPagina()">➕ Crear otra página</button>
   </div>
 
 </div>
@@ -103,6 +104,16 @@
 
     abrirVista(htmlInput.value, publicado);
   }
+
+function nuevaPagina() {
+  if (!confirm("¿Crear una página nueva? Se perderá el borrador actual.")) return;
+
+  localStorage.removeItem("draft_nombre");
+  localStorage.removeItem("draft_html");
+
+  location.hash = "";
+  location.reload();
+}
 
   function abrirVista(html, publicado) {
     document.open();
