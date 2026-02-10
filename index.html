@@ -21,13 +21,8 @@
       margin: auto;
     }
 
-    .pantalla {
-      display: none;
-    }
-
-    .pantalla.activa {
-      display: block;
-    }
+    .pantalla { display: none; }
+    .pantalla.activa { display: block; }
 
     input, textarea, button {
       width: 100%;
@@ -58,14 +53,12 @@
 
 <div class="contenedor">
 
-  <!-- PANTALLA 1 -->
   <div id="pantalla1" class="pantalla activa">
     <h2>📱 Crea tu página</h2>
     <input id="nombrePagina" placeholder="Nombre de tu página">
     <button onclick="entrar()">Entrar</button>
   </div>
 
-  <!-- PANTALLA 2 -->
   <div id="pantalla2" class="pantalla">
     <h2 id="tituloPagina"></h2>
     <textarea id="htmlInput" placeholder="Pegá tu HTML acá..."></textarea>
@@ -78,7 +71,6 @@
 <script>
   let nombre = "";
 
-  // CARGAR PÁGINA DESDE LINK
   window.onload = () => {
     const hash = location.hash.replace("#", "");
     if (hash) {
@@ -115,61 +107,54 @@
   function mostrarPagina(html, publicado) {
     document.open();
     document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${nombre}</title>
-        <style>
-          body { margin: 0; font-family: system-ui; }
-          #barra {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            display: flex;
-            gap: 10px;
-            z-index: 9999;
-          }
-          .btn {
-            background: black;
-            color: white;
-            padding: 10px 14px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-          }
-        </style>
-      </head>
-      <body>
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${nombre}</title>
+<style>
+body { margin:0; font-family:system-ui; }
+#barra {
+  position:fixed;
+  top:10px;
+  left:10px;
+  display:flex;
+  gap:10px;
+  z-index:9999;
+}
+.btn {
+  background:black;
+  color:white;
+  padding:10px 14px;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
 
-        <div id="barra">
-          ${publicado ? "" : `<div class="btn" onclick="location.href=location.pathname">⬅ Editor</div>`}
-          <div class="btn" onclick="compartir()">📤 Compartir</div>
-        </div>
+<div id="barra">
+  ${publicado ? "" : `<div class="btn" onclick="location.href=location.pathname">⬅ Editor</div>`}
+  <div class="btn" onclick="compartir()">📤 Compartir</div>
+</div>
 
-        ${html}
+${html}
 
-        <script>
-          function compartir() {
-            const url = location.href;
-            if (navigator.share) {
-              navigator.share({ title: document.title, url });
-            } else {
-              navigator.clipboard.writeText(url);
-              alert("Link copiado");
-            }
-          }
-        <\/script>
-
-      </body>
-      </html>
-    `);
-    document.close();
+<script>
+function compartir() {
+  const url = location.href;
+  if (navigator.share) {
+    navigator.share({ title: document.title, url });
+  } else {
+    navigator.clipboard.writeText(url);
+    alert("Link copiado");
   }
-</script>
+}
+<\/script>
 
-      </body>
-      </html>
+</body>
+</html>
     `);
     document.close();
   }
