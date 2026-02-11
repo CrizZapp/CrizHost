@@ -40,26 +40,44 @@
     .btn-publicar {
       background: #22c55e;
     }
+    .btn-ia {
+      background: #f59e0b; /* Color naranja para diferenciarlo */
+      color: white;
+    }
+    .loading { 
+      display: none; 
+      text-align: center; 
+      margin-top: 10px; 
+      color: #f59e0b; 
+      font-weight: bold; 
+    }
   </style>
 </head>
 <body>
 
 <div class="contenedor">
 
-  <!-- PANTALLA 1 -->
   <div id="pantalla1" class="pantalla activa">
     <h2>📱 Crea tu página</h2>
     <input id="nombrePagina" placeholder="Nombre de tu página">
     <button onclick="entrar()">Entrar</button>
   </div>
 
-  <!-- PANTALLA 2 -->
   <div id="pantalla2" class="pantalla">
     <h2 id="tituloPagina"></h2>
     <textarea id="htmlInput" placeholder="Pegá el HTML de tu pagina aca..."></textarea>
     <button onclick="verPagina(false)">👁 Ver</button>
-<button class="btn-publicar" onclick="verPagina(true)">🚀 Publicar</button>
-<button onclick="nuevaPagina()">➕ Crear otra página</button>
+    <button class="btn-ia" onclick="irAIa()">✨ Generar con IA</button>
+    <button class="btn-publicar" onclick="verPagina(true)">🚀 Publicar</button>
+    <button onclick="nuevaPagina()">➕ Crear otra página</button>
+  </div>
+
+  <div id="pantallaIa" class="pantalla">
+    <h2>✨ Explícale a la IA...</h2>
+    <textarea id="iaPrompt" placeholder="Ej: Crea una página con fondo negro, texto verde neón que diga HOLA MUNDO y un botón rojo..."></textarea>
+    <div id="loader" class="loading">La IA está escribiendo el código... ⏳</div>
+    <button class="btn-ia" id="btnGen" onclick="generarGratis()">Generar ahora</button>
+    <button style="background:#475569; color:white;" onclick="irAEditor()">⬅ Volver al Editor</button>
   </div>
 
 </div>
@@ -69,29 +87,78 @@
 
   // Cargar borrador si existe
   window.onload = () => {
-  const draftNombre = localStorage.getItem("draft_nombre");
-  const draftHtml = localStorage.getItem("draft_html");
+    const draftNombre = localStorage.getItem("draft_nombre");
+    const draftHtml = localStorage.getItem("draft_html");
 
-  if (draftNombre && draftHtml) {
-    nombre = draftNombre;
-    nombrePagina.value = draftNombre;
-    htmlInput.value = draftHtml;
-    tituloPagina.innerText = "Editando: " + nombre;
+    if (draftNombre && draftHtml) {
+      nombre = draftNombre;
+      nombrePagina.value = draftNombre;
+      htmlInput.value = draftHtml;
+      tituloPagina.innerText = "Editando: " + nombre;
 
-    pantalla1.classList.remove("activa");
-    pantalla2.classList.add("activa");
-  }
-};
+      pantalla1.classList.remove("activa");
+      pantalla2.classList.add("activa");
+    }
+  };
 
   function entrar() {
     nombre = nombrePagina.value.trim();
     if (!nombre) return alert("Poné un nombre");
-
     localStorage.setItem("draft_nombre", nombre);
-
     tituloPagina.innerText = "Editando: " + nombre;
     pantalla1.classList.remove("activa");
     pantalla2.classList.add("activa");
+  }
+
+  // Funciones de navegación
+  function irAIa() {
+    pantalla2.classList.remove("activa");
+    pantallaIa.classList.add("activa");
+  }
+
+  function irAEditor() {
+    pantallaIa.classList.remove("activa");
+    pantalla2.classList.add("activa");
+  }
+
+  // MOTOR IA (Gratis y sin API Keys)
+  async function generarGratis() {
+    const promptUser = document.getElementById('iaPrompt').value;
+    if (!promptUser) return alert("Dime qué quieres que haga la IA");
+
+    const btn = document.getElementById('btnGen');
+    const loader = document.getElementById('loader');
+    btn.disabled = true;
+    loader.style.display = "block";
+
+    try {
+      const response = await fetch("https://text.pollinations.ai/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [
+            { role: "system", content: "Eres un experto en HTML y CSS. Responde SOLO con el código solicitado. Sin explicaciones, sin markdown." },
+            { role: "user", content: `Genera el código HTML y CSS para una página llamada ${nombre}. Requisito: ${promptUser}` }
+          ],
+          model: "openai"
+        })
+      });
+
+      const texto = await response.text();
+      let codigoLimpio = texto.replace(/```html|```css|```/gi, "").trim();
+      
+      document.getElementById('htmlInput').value = codigoLimpio;
+      localStorage.setItem("draft_html", codigoLimpio);
+      
+      alert("¡Código generado!");
+      irAEditor(); // Vuelve al editor para que el usuario pueda ver, editar o publicar
+
+    } catch (error) {
+      alert("Error al conectar. Intenta de nuevo.");
+    } finally {
+      btn.disabled = false;
+      loader.style.display = "none";
+    }
   }
 
   function verPagina(publicado) {
@@ -105,20 +172,17 @@
     abrirVista(htmlInput.value, publicado);
   }
 
-function nuevaPagina() {
-  if (!confirm("¿Crear una página nueva? Se perderá el borrador actual.")) return;
+  function nuevaPagina() {
+    if (!confirm("¿Crear una página nueva? Se perderá el borrador actual.")) return;
+    localStorage.removeItem("draft_nombre");
+    localStorage.removeItem("draft_html");
+    location.hash = "";
+    location.reload();
+  }
 
-  localStorage.removeItem("draft_nombre");
-  localStorage.removeItem("draft_html");
-
-  location.hash = "";
-  location.reload();
-}
-
-  
   function abrirVista(html, publicado) {
-  document.open();
-  document.write(`<!DOCTYPE html>
+    document.open();
+    document.write(`<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -158,16 +222,12 @@ body { margin:0; font-family:system-ui; }
 </style>
 </head>
 <body>
-
 <div id="barra">
   ${publicado ? "" : `<div class="btn" onclick="location.reload()">⬅ Editor</div>`}
   <div class="btn" onclick="compartir()">📤 Compartir</div>
 </div>
-
 <div id="toggleBtn" onclick="toggleBar()">👁️</div>
-
 ${html}
-
 <script>
 function compartir() {
   const url = location.href;
@@ -178,7 +238,6 @@ function compartir() {
     alert("Link copiado");
   }
 }
-
 function toggleBar() {
   const barra = document.getElementById('barra');
   const toggle = document.getElementById('toggleBtn');
@@ -193,11 +252,10 @@ function toggleBar() {
   }
 }
 <\/script>
-
 </body>
 </html>`);
-  document.close();
-}
+    document.close();
+  }
 </script>
 
 </body>
